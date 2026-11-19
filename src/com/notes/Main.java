@@ -1,8 +1,10 @@
+
 package com.notes;
 
 import com.notes.dao.FolderDAO;
 import com.notes.dao.NoteDAO;
 import com.notes.dao.TagDAO;
+import com.notes.dao.UserDAO;
 import com.notes.helper.DBConnection;
 import com.notes.web.*;
 import com.sun.net.httpserver.HttpServer;
@@ -39,21 +41,28 @@ public class Main {
         }
 
         try {
+            UserDAO userDAO = new UserDAO();
             NoteDAO noteDAO = new NoteDAO();
             FolderDAO folderDAO = new FolderDAO();
             TagDAO tagDAO = new TagDAO();
 
             HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
+            // register authentication routes
+            AuthHandler authHandler = new AuthHandler(userDAO);
+            server.createContext("/login", authHandler);
+            server.createContext("/signup", authHandler);
+            server.createContext("/logout", authHandler);
+
             // register application routes
-            server.createContext("/", new DashboardHandler(noteDAO, folderDAO, tagDAO));
-            server.createContext("/notes", new NoteListHandler(noteDAO, folderDAO, tagDAO));
-            server.createContext("/notes/view", new NoteViewHandler(noteDAO, folderDAO, tagDAO));
-            server.createContext("/notes/new", new NoteFormHandler(noteDAO, folderDAO, tagDAO));
-            server.createContext("/notes/edit", new NoteFormHandler(noteDAO, folderDAO, tagDAO));
-            server.createContext("/notes/delete", new NoteDeleteHandler(noteDAO, folderDAO, tagDAO));
-            server.createContext("/notes/pin", new NotePinHandler(noteDAO));
-            server.createContext("/folders", new FolderHandler(folderDAO, tagDAO, noteDAO));
+            server.createContext("/", new DashboardHandler(noteDAO, folderDAO, tagDAO, userDAO));
+            server.createContext("/notes", new NoteListHandler(noteDAO, folderDAO, tagDAO, userDAO));
+            server.createContext("/notes/view", new NoteViewHandler(noteDAO, folderDAO, tagDAO, userDAO));
+            server.createContext("/notes/new", new NoteFormHandler(noteDAO, folderDAO, tagDAO, userDAO));
+            server.createContext("/notes/edit", new NoteFormHandler(noteDAO, folderDAO, tagDAO, userDAO));
+            server.createContext("/notes/delete", new NoteDeleteHandler(noteDAO, folderDAO, tagDAO, userDAO));
+            server.createContext("/notes/pin", new NotePinHandler(noteDAO, userDAO));
+            server.createContext("/folders", new FolderHandler(folderDAO, tagDAO, noteDAO, userDAO));
             server.createContext("/static/", new StaticHandler());
 
             // use a small thread pool to handle multiple requests

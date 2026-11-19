@@ -3,10 +3,13 @@ package com.notes.web;
 import com.notes.dao.FolderDAO;
 import com.notes.dao.NoteDAO;
 import com.notes.dao.TagDAO;
+import com.notes.dao.UserDAO;
 import com.notes.helper.HtmlUtil;
 import com.notes.helper.RequestHelper;
+import com.notes.helper.SessionHelper;
 import com.notes.model.Note;
 import com.notes.model.Tag;
+import com.notes.model.User;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -18,11 +21,13 @@ public class DashboardHandler implements HttpHandler {
     private final NoteDAO noteDAO;
     private final FolderDAO folderDAO;
     private final TagDAO tagDAO;
+    private final UserDAO userDAO;
 
-    public DashboardHandler(NoteDAO noteDAO, FolderDAO folderDAO, TagDAO tagDAO) {
+    public DashboardHandler(NoteDAO noteDAO, FolderDAO folderDAO, TagDAO tagDAO, UserDAO userDAO) {
         this.noteDAO = noteDAO;
         this.folderDAO = folderDAO;
         this.tagDAO = tagDAO;
+        this.userDAO = userDAO;
     }
 
     @Override
@@ -33,8 +38,14 @@ public class DashboardHandler implements HttpHandler {
             return;
         }
 
-        List<Note> pinned = noteDAO.getPinnedNotes();
-        List<Note> recent = noteDAO.getRecentNotes(10);
+        User user = SessionHelper.getUser(exchange, userDAO);
+        if (user == null) {
+            RequestHelper.redirect(exchange, "/login");
+            return;
+        }
+
+        List<Note> pinned = noteDAO.getPinnedNotes(user.getId());
+        List<Note> recent = noteDAO.getRecentNotes(user.getId(), 10);
 
         StringBuilder sb = new StringBuilder();
         sb.append("<div style=\"display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px;\">\n");
@@ -72,7 +83,7 @@ public class DashboardHandler implements HttpHandler {
         }
         sb.append("</div>\n");
 
-        String page = Layout.page("Dashboard", "dashboard", sb.toString(), folderDAO, tagDAO, noteDAO);
+        String page = Layout.page("Dashboard", "dashboard", sb.toString(), folderDAO, tagDAO, noteDAO, user);
         RequestHelper.sendHtml(exchange, 200, page);
     }
 

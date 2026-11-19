@@ -3,9 +3,12 @@ package com.notes.web;
 import com.notes.dao.FolderDAO;
 import com.notes.dao.NoteDAO;
 import com.notes.dao.TagDAO;
+import com.notes.dao.UserDAO;
 import com.notes.helper.HtmlUtil;
 import com.notes.helper.RequestHelper;
+import com.notes.helper.SessionHelper;
 import com.notes.model.Folder;
+import com.notes.model.User;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -18,46 +21,54 @@ public class FolderHandler implements HttpHandler {
     private final FolderDAO folderDAO;
     private final TagDAO tagDAO;
     private final NoteDAO noteDAO;
+    private final UserDAO userDAO;
 
-    public FolderHandler(FolderDAO folderDAO, TagDAO tagDAO, NoteDAO noteDAO) {
+    public FolderHandler(FolderDAO folderDAO, TagDAO tagDAO, NoteDAO noteDAO, UserDAO userDAO) {
         this.folderDAO = folderDAO;
         this.tagDAO = tagDAO;
         this.noteDAO = noteDAO;
+        this.userDAO = userDAO;
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        User user = SessionHelper.getUser(exchange, userDAO);
+        if (user == null) {
+            RequestHelper.redirect(exchange, "/login");
+            return;
+        }
+
         String path = exchange.getRequestURI().getPath();
 
         if (path.endsWith("/delete")) {
-            handleDelete(exchange);
+            handleDelete(exchange, user);
             return;
         }
 
         if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            handlePost(exchange);
+            handlePost(exchange, user);
         } else {
-            handleGet(exchange, null);
+            handleGet(exchange, null, user);
         }
     }
 
-    private void handlePost(HttpExchange exchange) throws IOException {
+    private void handlePost(HttpExchange exchange, User user) throws IOException {
         Map<String, String> form = RequestHelper.getFormData(exchange);
         String action = form.getOrDefault("action", "create");
 
         if ("create".equalsIgnoreCase(action)) {
             String name = form.getOrDefault("name", "").trim();
             if (name.isEmpty()) {
-                handleGet(exchange, "Folder name cannot be empty.");
+                handleGet(exchange, "Folder name cannot be empty.", user);
                 return;
             }
             if (name.length() > 100) {
-                handleGet(exchange, "Folder name is too long.");
+                handleGet(exchange, "Folder name is too long.", user);
                 return;
             }
-            Folder created = folderDAO.createFolder(name);
+            Folder created = folderDAO.createFolder(name, user.getId());
             if (created == null) {
-                handleGet(exchange, "Folder with this name already exists.");
+                handleGet(exchange, "Folder with this name already exists.", user);
                 return;
             }
         } else if ("rename".equalsIgnoreCase(action)) {
@@ -65,7 +76,7 @@ public class FolderHandler implements HttpHandler {
             String newName = form.getOrDefault("new_name", "").trim();
             if (idStr != null && !newName.isEmpty()) {
                 try {
-                    folderDAO.renameFolder(Integer.parseInt(idStr), newName);
+                    folderDAO.renameFolder(Integer.parseInt(idStr), newName, user.getId());
                 } catch (NumberFormatException ignored) {}
             }
         }
@@ -73,9 +84,9 @@ public class FolderHandler implements HttpHandler {
         RequestHelper.redirect(exchange, "/folders");
     }
 
-    private void handleGet(HttpExchange exchange, String errorMessage) throws IOException {
-        List<Folder> folders = folderDAO.getAllFolders();
-        Map<Integer, Integer> counts = folderDAO.getFolderCounts();
+    private void handleGet(HttpExchange exchange, String errorMessage, User user) throws IOException {
+        List<Folder> folders = folderDAO.getAllFolders(user.getId());
+        Map<Integer, Integer> counts = folderDAO.getFolderCounts(user.getId());
 
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"page-header\">\n");
@@ -135,17 +146,17 @@ public class FolderHandler implements HttpHandler {
         sb.append("  </tbody>\n");
         sb.append("</table>\n");
 
-        String page = Layout.page("Folders", "folders", sb.toString(), folderDAO, tagDAO, noteDAO);
+        String page = Layout.page("Folders", "folders", sb.toString(), folderDAO, tagDAO, noteDAO, user);
         RequestHelper.sendHtml(exchange, 200, page);
     }
 
-    private void handleDelete(HttpExchange exchange) throws IOException {
+    private void handleDelete(HttpExchange exchange, User user) throws IOException {
         if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
             Map<String, String> form = RequestHelper.getFormData(exchange);
             String idStr = form.get("id");
             if (idStr != null && !idStr.isEmpty()) {
                 try {
-                    folderDAO.deleteFolder(Integer.parseInt(idStr));
+                    folderDAO.deleteFolder(Integer.parseInt(idStr), user.getId());
                 } catch (NumberFormatException ignored) {}
             }
             RequestHelper.redirect(exchange, "/folders");
@@ -166,7 +177,7 @@ public class FolderHandler implements HttpHandler {
                 return;
             }
 
-            Folder folder = folderDAO.getFolderById(id);
+            Folder folder = folderDAO.getFolderById(id, user.getId());
             if (folder == null) {
                 RequestHelper.redirect(exchange, "/folders");
                 return;
@@ -189,7 +200,7 @@ public class FolderHandler implements HttpHandler {
             sb.append("  </form>\n");
             sb.append("</div>\n");
 
-            String page = Layout.page("Delete Folder", "folders", sb.toString(), folderDAO, tagDAO, noteDAO);
+            String page = Layout.page("Delete Folder", "folders", sb.toString(), folderDAO, tagDAO, noteDAO, user);
             RequestHelper.sendHtml(exchange, 200, page);
         }
     }

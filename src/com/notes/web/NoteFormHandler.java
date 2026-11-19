@@ -3,11 +3,14 @@ package com.notes.web;
 import com.notes.dao.FolderDAO;
 import com.notes.dao.NoteDAO;
 import com.notes.dao.TagDAO;
+import com.notes.dao.UserDAO;
 import com.notes.helper.HtmlUtil;
 import com.notes.helper.RequestHelper;
+import com.notes.helper.SessionHelper;
 import com.notes.model.Folder;
 import com.notes.model.Note;
 import com.notes.model.Tag;
+import com.notes.model.User;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -22,37 +25,45 @@ public class NoteFormHandler implements HttpHandler {
     private final NoteDAO noteDAO;
     private final FolderDAO folderDAO;
     private final TagDAO tagDAO;
+    private final UserDAO userDAO;
 
-    public NoteFormHandler(NoteDAO noteDAO, FolderDAO folderDAO, TagDAO tagDAO) {
+    public NoteFormHandler(NoteDAO noteDAO, FolderDAO folderDAO, TagDAO tagDAO, UserDAO userDAO) {
         this.noteDAO = noteDAO;
         this.folderDAO = folderDAO;
         this.tagDAO = tagDAO;
+        this.userDAO = userDAO;
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        User user = SessionHelper.getUser(exchange, userDAO);
+        if (user == null) {
+            RequestHelper.redirect(exchange, "/login");
+            return;
+        }
+
         if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            handlePost(exchange);
+            handlePost(exchange, user);
         } else {
-            handleGet(exchange, null);
+            handleGet(exchange, null, user);
         }
     }
 
-    private void handleGet(HttpExchange exchange, String errorMessage) throws IOException {
+    private void handleGet(HttpExchange exchange, String errorMessage, User user) throws IOException {
         Map<String, String> params = RequestHelper.getQueryParams(exchange);
         String idStr = params.get("id");
 
         Note note = null;
         if (idStr != null && !idStr.isEmpty()) {
             try {
-                note = noteDAO.getNoteById(Integer.parseInt(idStr));
+                note = noteDAO.getNoteById(Integer.parseInt(idStr), user.getId());
             } catch (NumberFormatException ignored) {}
         }
 
-        renderForm(exchange, note, errorMessage);
+        renderForm(exchange, note, errorMessage, user);
     }
 
-    private void handlePost(HttpExchange exchange) throws IOException {
+    private void handlePost(HttpExchange exchange, User user) throws IOException {
         Map<String, String> form = RequestHelper.getFormData(exchange);
 
         int id = 0;
@@ -69,21 +80,21 @@ public class NoteFormHandler implements HttpHandler {
 
         // Validation
         if (title.isEmpty()) {
-            Note temp = new Note(id, title, content, null, isPinned, null, null);
-            renderForm(exchange, temp, "Title cannot be empty.");
+            Note temp = new Note(id, title, content, null, user.getId(), isPinned, null, null);
+            renderForm(exchange, temp, "Title cannot be empty.", user);
             return;
         }
 
         if (title.length() > 255) {
-            Note temp = new Note(id, title, content, null, isPinned, null, null);
-            renderForm(exchange, temp, "Title is too long (maximum 255 characters).");
+            Note temp = new Note(id, title, content, null, user.getId(), isPinned, null, null);
+            renderForm(exchange, temp, "Title is too long (maximum 255 characters).", user);
             return;
         }
 
         Folder folder = null;
         if (!folderStr.isEmpty()) {
             try {
-                folder = folderDAO.getFolderById(Integer.parseInt(folderStr));
+                folder = folderDAO.getFolderById(Integer.parseInt(folderStr), user.getId());
             } catch (NumberFormatException ignored) {}
         }
 
@@ -102,6 +113,7 @@ public class NoteFormHandler implements HttpHandler {
         note.setTitle(title);
         note.setContent(content);
         note.setFolder(folder);
+        note.setUserId(user.getId());
         note.setTags(tags);
         note.setPinned(isPinned);
 
@@ -113,15 +125,15 @@ public class NoteFormHandler implements HttpHandler {
             if (saved != null) {
                 RequestHelper.redirect(exchange, "/notes/view?id=" + saved.getId());
             } else {
-                renderForm(exchange, note, "Error saving note to database.");
+                renderForm(exchange, note, "Error saving note to database.", user);
             }
         }
     }
 
-    private void renderForm(HttpExchange exchange, Note note, String errorMessage) throws IOException {
+    private void renderForm(HttpExchange exchange, Note note, String errorMessage, User user) throws IOException {
         boolean isEdit = (note != null && note.getId() > 0);
         String formTitle = isEdit ? "Edit note" : "New note";
-        List<Folder> folders = folderDAO.getAllFolders();
+        List<Folder> folders = folderDAO.getAllFolders(user.getId());
 
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"form-box\">\n");
@@ -193,7 +205,7 @@ public class NoteFormHandler implements HttpHandler {
         sb.append("  </form>\n");
         sb.append("</div>\n");
 
-        String page = Layout.page(formTitle, isEdit ? "notes" : "new", sb.toString(), folderDAO, tagDAO, noteDAO);
+        String page = Layout.page(formTitle, isEdit ? "notes" : "new", sb.toString(), folderDAO, tagDAO, noteDAO, user);
         RequestHelper.sendHtml(exchange, 200, page);
     }
 }

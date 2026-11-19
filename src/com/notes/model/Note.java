@@ -9,6 +9,7 @@ public class Note {
     private String title;
     private String content;
     private Folder folder;
+    private int userId;
     private Set<Tag> tags = new HashSet<>();
     private boolean pinned;
     private Timestamp createdAt;
@@ -17,15 +18,21 @@ public class Note {
     public Note() {
     }
 
-    public Note(int id, String title, String content, Folder folder, boolean pinned,
+    public Note(int id, String title, String content, Folder folder, int userId, boolean pinned,
                 Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.folder = folder;
+        this.userId = userId;
         this.pinned = pinned;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public Note(int id, String title, String content, Folder folder, boolean pinned,
+                Timestamp createdAt, Timestamp updatedAt) {
+        this(id, title, content, folder, 0, pinned, createdAt, updatedAt);
     }
 
     public int getId() {
@@ -58,6 +65,14 @@ public class Note {
 
     public void setFolder(Folder folder) {
         this.folder = folder;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public Set<Tag> getTags() {

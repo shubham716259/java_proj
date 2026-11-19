@@ -24,6 +24,28 @@ public class TagDAO {
         return list;
     }
 
+    // gets only the tags that appear on notes belonging to this user
+    public List<Tag> getAllTagsForUser(int userId) {
+        List<Tag> list = new ArrayList<>();
+        String sql = "SELECT DISTINCT t.id, t.name FROM tags t " +
+                     "JOIN note_tags nt ON t.id = nt.tag_id " +
+                     "JOIN notes n ON nt.note_id = n.id " +
+                     "WHERE n.user_id = ? ORDER BY t.name ASC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new Tag(rs.getInt("id"), rs.getString("name")));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("TagDAO.getAllTagsForUser: " + e.getMessage());
+        }
+        return list;
+    }
+
     public Tag getTagById(int id) {
         String sql = "SELECT id, name FROM tags WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -150,15 +172,19 @@ public class TagDAO {
         }
     }
 
-    public Map<Integer, Integer> getTagCounts() {
+    public Map<Integer, Integer> getTagCounts(int userId) {
         Map<Integer, Integer> counts = new HashMap<>();
-        String sql = "SELECT tag_id, COUNT(*) AS total FROM note_tags GROUP BY tag_id";
+        String sql = "SELECT nt.tag_id, COUNT(*) AS total FROM note_tags nt " +
+                     "JOIN notes n ON nt.note_id = n.id " +
+                     "WHERE n.user_id = ? GROUP BY nt.tag_id";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                counts.put(rs.getInt("tag_id"), rs.getInt("total"));
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    counts.put(rs.getInt("tag_id"), rs.getInt("total"));
+                }
             }
         } catch (SQLException e) {
             System.out.println("TagDAO.getTagCounts: " + e.getMessage());

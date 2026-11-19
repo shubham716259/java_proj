@@ -19,13 +19,14 @@ public class NoteDAO {
         note.setId(rs.getInt("id"));
         note.setTitle(rs.getString("title"));
         note.setContent(rs.getString("content"));
+        note.setUserId(rs.getInt("user_id"));
         note.setPinned(rs.getBoolean("is_pinned"));
         note.setCreatedAt(rs.getTimestamp("created_at"));
         note.setUpdatedAt(rs.getTimestamp("updated_at"));
 
         int folderId = rs.getInt("folder_id");
         if (!rs.wasNull()) {
-            note.setFolder(new Folder(folderId, rs.getString("folder_name")));
+            note.setFolder(new Folder(folderId, rs.getString("folder_name"), note.getUserId()));
         } else {
             note.setFolder(null);
         }
@@ -37,19 +38,21 @@ public class NoteDAO {
     }
 
     private static final String SELECT_BASE =
-            "SELECT n.id, n.title, n.content, n.folder_id, n.is_pinned, n.created_at, n.updated_at, f.name AS folder_name " +
+            "SELECT n.id, n.title, n.content, n.folder_id, n.user_id, n.is_pinned, n.created_at, n.updated_at, f.name AS folder_name " +
             "FROM notes n LEFT JOIN folders f ON n.folder_id = f.id ";
 
-    public List<Note> getAllNotes() {
+    public List<Note> getAllNotes(int userId) {
         List<Note> list = new ArrayList<>();
-        String sql = SELECT_BASE + "ORDER BY n.is_pinned DESC, n.updated_at DESC";
+        String sql = SELECT_BASE + "WHERE n.user_id = ? ORDER BY n.is_pinned DESC, n.updated_at DESC";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                list.add(mapRow(rs));
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
             }
         } catch (SQLException e) {
             System.out.println("NoteDAO.getAllNotes: " + e.getMessage());
@@ -57,12 +60,13 @@ public class NoteDAO {
         return list;
     }
 
-    public Note getNoteById(int id) {
-        String sql = SELECT_BASE + "WHERE n.id = ?";
+    public Note getNoteById(int id, int userId) {
+        String sql = SELECT_BASE + "WHERE n.id = ? AND n.user_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
+            ps.setInt(2, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return mapRow(rs);
@@ -74,16 +78,18 @@ public class NoteDAO {
         return null;
     }
 
-    public List<Note> getPinnedNotes() {
+    public List<Note> getPinnedNotes(int userId) {
         List<Note> list = new ArrayList<>();
-        String sql = SELECT_BASE + "WHERE n.is_pinned = TRUE ORDER BY n.updated_at DESC";
+        String sql = SELECT_BASE + "WHERE n.is_pinned = TRUE AND n.user_id = ? ORDER BY n.updated_at DESC";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                list.add(mapRow(rs));
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
             }
         } catch (SQLException e) {
             System.out.println("NoteDAO.getPinnedNotes: " + e.getMessage());
@@ -91,14 +97,15 @@ public class NoteDAO {
         return list;
     }
 
-    public List<Note> getRecentNotes(int limit) {
+    public List<Note> getRecentNotes(int userId, int limit) {
         List<Note> list = new ArrayList<>();
-        String sql = SELECT_BASE + "ORDER BY n.updated_at DESC LIMIT ?";
+        String sql = SELECT_BASE + "WHERE n.user_id = ? ORDER BY n.updated_at DESC LIMIT ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, limit);
+            ps.setInt(1, userId);
+            ps.setInt(2, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapRow(rs));
@@ -110,14 +117,15 @@ public class NoteDAO {
         return list;
     }
 
-    public List<Note> getNotesByFolder(int folderId) {
+    public List<Note> getNotesByFolder(int folderId, int userId) {
         List<Note> list = new ArrayList<>();
-        String sql = SELECT_BASE + "WHERE n.folder_id = ? ORDER BY n.is_pinned DESC, n.updated_at DESC";
+        String sql = SELECT_BASE + "WHERE n.folder_id = ? AND n.user_id = ? ORDER BY n.is_pinned DESC, n.updated_at DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, folderId);
+            ps.setInt(2, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapRow(rs));
@@ -129,15 +137,16 @@ public class NoteDAO {
         return list;
     }
 
-    public List<Note> getNotesByTag(int tagId) {
+    public List<Note> getNotesByTag(int tagId, int userId) {
         List<Note> list = new ArrayList<>();
         String sql = SELECT_BASE + "JOIN note_tags nt ON n.id = nt.note_id " +
-                     "WHERE nt.tag_id = ? ORDER BY n.is_pinned DESC, n.updated_at DESC";
+                     "WHERE nt.tag_id = ? AND n.user_id = ? ORDER BY n.is_pinned DESC, n.updated_at DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, tagId);
+            ps.setInt(2, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapRow(rs));
@@ -150,7 +159,7 @@ public class NoteDAO {
     }
 
     public Note createNote(Note note) {
-        String sql = "INSERT INTO notes (title, content, folder_id, is_pinned) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO notes (title, content, folder_id, user_id, is_pinned) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -161,7 +170,8 @@ public class NoteDAO {
             } else {
                 ps.setNull(3, Types.INTEGER);
             }
-            ps.setBoolean(4, note.isPinned());
+            ps.setInt(4, note.getUserId());
+            ps.setBoolean(5, note.isPinned());
             ps.executeUpdate();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -174,7 +184,7 @@ public class NoteDAO {
                 tagDAO.syncNoteTags(note.getId(), note.getTags());
             }
 
-            return getNoteById(note.getId());
+            return getNoteById(note.getId(), note.getUserId());
         } catch (SQLException e) {
             System.out.println("NoteDAO.createNote: " + e.getMessage());
             return null;
@@ -182,7 +192,7 @@ public class NoteDAO {
     }
 
     public boolean updateNote(Note note) {
-        String sql = "UPDATE notes SET title = ?, content = ?, folder_id = ?, is_pinned = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        String sql = "UPDATE notes SET title = ?, content = ?, folder_id = ?, is_pinned = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -195,6 +205,7 @@ public class NoteDAO {
             }
             ps.setBoolean(4, note.isPinned());
             ps.setInt(5, note.getId());
+            ps.setInt(6, note.getUserId());
 
             int affected = ps.executeUpdate();
             if (affected > 0) {
@@ -207,12 +218,13 @@ public class NoteDAO {
         return false;
     }
 
-    public boolean deleteNote(int id) {
-        String sql = "DELETE FROM notes WHERE id = ?";
+    public boolean deleteNote(int id, int userId) {
+        String sql = "DELETE FROM notes WHERE id = ? AND user_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
+            ps.setInt(2, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("NoteDAO.deleteNote: " + e.getMessage());
@@ -220,12 +232,13 @@ public class NoteDAO {
         }
     }
 
-    public boolean togglePin(int id) {
-        String sql = "UPDATE notes SET is_pinned = NOT is_pinned WHERE id = ?";
+    public boolean togglePin(int id, int userId) {
+        String sql = "UPDATE notes SET is_pinned = NOT is_pinned WHERE id = ? AND user_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
+            ps.setInt(2, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("NoteDAO.togglePin: " + e.getMessage());
@@ -233,13 +246,15 @@ public class NoteDAO {
         }
     }
 
-    public int countAll() {
-        String sql = "SELECT COUNT(*) FROM notes";
+    public int countAll(int userId) {
+        String sql = "SELECT COUNT(*) FROM notes WHERE user_id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            if (rs.next()) return rs.getInt(1);
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
         } catch (SQLException ignored) {
         }
         return 0;

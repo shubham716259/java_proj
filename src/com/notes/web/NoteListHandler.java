@@ -3,13 +3,16 @@ package com.notes.web;
 import com.notes.dao.FolderDAO;
 import com.notes.dao.NoteDAO;
 import com.notes.dao.TagDAO;
+import com.notes.dao.UserDAO;
 import com.notes.helper.HtmlUtil;
 import com.notes.helper.RequestHelper;
 import com.notes.helper.SearchHelper;
 import com.notes.helper.SearchHelper.SearchResult;
+import com.notes.helper.SessionHelper;
 import com.notes.model.Folder;
 import com.notes.model.Note;
 import com.notes.model.Tag;
+import com.notes.model.User;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -23,15 +26,23 @@ public class NoteListHandler implements HttpHandler {
     private final NoteDAO noteDAO;
     private final FolderDAO folderDAO;
     private final TagDAO tagDAO;
+    private final UserDAO userDAO;
 
-    public NoteListHandler(NoteDAO noteDAO, FolderDAO folderDAO, TagDAO tagDAO) {
+    public NoteListHandler(NoteDAO noteDAO, FolderDAO folderDAO, TagDAO tagDAO, UserDAO userDAO) {
         this.noteDAO = noteDAO;
         this.folderDAO = folderDAO;
         this.tagDAO = tagDAO;
+        this.userDAO = userDAO;
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        User user = SessionHelper.getUser(exchange, userDAO);
+        if (user == null) {
+            RequestHelper.redirect(exchange, "/login");
+            return;
+        }
+
         Map<String, String> params = RequestHelper.getQueryParams(exchange);
 
         String q = params.getOrDefault("q", "").trim();
@@ -43,18 +54,18 @@ public class NoteListHandler implements HttpHandler {
         List<Note> pool;
         if (!folderParam.isEmpty()) {
             try {
-                pool = noteDAO.getNotesByFolder(Integer.parseInt(folderParam));
+                pool = noteDAO.getNotesByFolder(Integer.parseInt(folderParam), user.getId());
             } catch (NumberFormatException e) {
-                pool = noteDAO.getAllNotes();
+                pool = noteDAO.getAllNotes(user.getId());
             }
         } else if (!tagParam.isEmpty()) {
             try {
-                pool = noteDAO.getNotesByTag(Integer.parseInt(tagParam));
+                pool = noteDAO.getNotesByTag(Integer.parseInt(tagParam), user.getId());
             } catch (NumberFormatException e) {
-                pool = noteDAO.getAllNotes();
+                pool = noteDAO.getAllNotes(user.getId());
             }
         } else {
-            pool = noteDAO.getAllNotes();
+            pool = noteDAO.getAllNotes(user.getId());
         }
 
         // if searching, score by matches and sort
@@ -69,8 +80,8 @@ public class NoteListHandler implements HttpHandler {
             SearchHelper.sortNotes(displayList, sortParam);
         }
 
-        List<Folder> allFolders = folderDAO.getAllFolders();
-        List<Tag> allTags = tagDAO.getAllTags();
+        List<Folder> allFolders = folderDAO.getAllFolders(user.getId());
+        List<Tag> allTags = tagDAO.getAllTagsForUser(user.getId());
 
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"page-header\">\n");
@@ -132,7 +143,7 @@ public class NoteListHandler implements HttpHandler {
             sb.append("</div>\n");
         }
 
-        String page = Layout.page("All Notes", "notes", sb.toString(), folderDAO, tagDAO, noteDAO);
+        String page = Layout.page("All Notes", "notes", sb.toString(), folderDAO, tagDAO, noteDAO, user);
         RequestHelper.sendHtml(exchange, 200, page);
     }
 }
