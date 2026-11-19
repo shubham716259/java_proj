@@ -23,9 +23,20 @@ public class DBConnection {
             password = props.getProperty("db.password", "");
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (IOException e) {
-            System.out.println("Could not read db.properties: " + e.getMessage());
+            System.out.println("Could not read db.properties, checking environment variables.");
         } catch (ClassNotFoundException e) {
             System.out.println("MySQL driver jar is missing from the classpath.");
+        }
+
+        // Allow cloud environments (Render, Railway, Docker) to override via environment variables
+        if (System.getenv("DB_URL") != null) {
+            url = System.getenv("DB_URL");
+        }
+        if (System.getenv("DB_USER") != null) {
+            user = System.getenv("DB_USER");
+        }
+        if (System.getenv("DB_PASSWORD") != null) {
+            password = System.getenv("DB_PASSWORD");
         }
     }
 

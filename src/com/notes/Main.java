@@ -28,16 +28,23 @@ public class Main {
             System.out.println("Check db.properties to make sure credentials and port are correct.");
         }
 
-        // read port from db.properties if specified
+        // read port from PORT environment variable (cloud hosting) or db.properties
         int port = 8080;
-        try (FileInputStream in = new FileInputStream("db.properties")) {
-            Properties p = new Properties();
-            p.load(in);
-            String portStr = p.getProperty("server.port");
-            if (portStr != null) {
-                port = Integer.parseInt(portStr.trim());
+        String envPort = System.getenv("PORT");
+        if (envPort != null && !envPort.isEmpty()) {
+            try {
+                port = Integer.parseInt(envPort.trim());
+            } catch (NumberFormatException ignored) {}
+        } else {
+            try (FileInputStream in = new FileInputStream("db.properties")) {
+                Properties p = new Properties();
+                p.load(in);
+                String portStr = p.getProperty("server.port");
+                if (portStr != null) {
+                    port = Integer.parseInt(portStr.trim());
+                }
+            } catch (Exception ignored) {
             }
-        } catch (Exception ignored) {
         }
 
         try {
