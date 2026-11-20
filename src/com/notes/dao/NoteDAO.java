@@ -187,6 +187,16 @@ public class NoteDAO {
             return getNoteById(note.getId(), note.getUserId());
         } catch (SQLException e) {
             System.out.println("NoteDAO.createNote: " + e.getMessage());
+            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("user_id")) {
+                try (Connection conn = DBConnection.getConnection();
+                     Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate("ALTER TABLE notes ADD COLUMN user_id INT NOT NULL DEFAULT 1");
+                    stmt.executeUpdate("ALTER TABLE folders ADD COLUMN user_id INT NOT NULL DEFAULT 1");
+                    return createNote(note);
+                } catch (SQLException ex) {
+                    System.out.println("Auto-heal column failed: " + ex.getMessage());
+                }
+            }
             return null;
         }
     }

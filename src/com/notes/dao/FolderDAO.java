@@ -25,6 +25,13 @@ public class FolderDAO {
             }
         } catch (SQLException e) {
             System.out.println("FolderDAO.getAllFolders: " + e.getMessage());
+            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("user_id")) {
+                try (Connection conn = DBConnection.getConnection();
+                     Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate("ALTER TABLE folders ADD COLUMN user_id INT NOT NULL DEFAULT 1");
+                    return getAllFolders(userId);
+                } catch (SQLException ignored) {}
+            }
         }
         return list;
     }

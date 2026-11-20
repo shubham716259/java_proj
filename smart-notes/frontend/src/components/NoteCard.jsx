@@ -7,8 +7,8 @@ import { Link } from 'react-router-dom';
  */
 export default function NoteCard({ note, onTogglePin, onDeleteClick }) {
   const snippet = note.content
-    ? note.content.length > 130
-      ? note.content.substring(0, 130) + '...'
+    ? note.content.length > 140
+      ? note.content.substring(0, 140) + '...'
       : note.content
     : '';
 
@@ -17,10 +17,34 @@ export default function NoteCard({ note, onTogglePin, onDeleteClick }) {
   return (
     <article className={`note-card ${note.isPinned ? 'is-pinned' : ''}`}>
       <div className="note-card-top">
-        <Link to={`/notes/${note.id}`} className="note-card-title">
-          {note.title}
-        </Link>
-        {note.isPinned && <span className="pin-badge">Pinned</span>}
+        <div className="note-card-title-wrap">
+          {note.isPinned && (
+            <span className="pin-icon" title="Pinned note">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="17" x2="12" y2="22" />
+                <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 0-2H8a1 1 0 0 0 0 2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+              </svg>
+            </span>
+          )}
+          <Link to={`/notes/${note.id}`} className="note-card-title">
+            {note.title}
+          </Link>
+        </div>
+
+        {note.isPinned && (
+          <span className="pin-badge">
+            Pinned
+          </span>
+        )}
       </div>
 
       <p className="note-card-snippet">{snippet}</p>
@@ -38,7 +62,7 @@ export default function NoteCard({ note, onTogglePin, onDeleteClick }) {
           ))
         )}
 
-        <span>{dateStr}</span>
+        <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{dateStr}</span>
 
         <div className="note-card-actions">
           {onTogglePin && (

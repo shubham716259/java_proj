@@ -128,7 +128,7 @@ export default function NoteDetailPage({ onDataChange }) {
         <div className="suggestions-section">
           <div className="suggestions-heading">Extracted Keywords (HashMap frequency)</div>
           {keywords.length === 0 ? (
-            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '13px', color: 'var(--muted)' }}>
               No distinctive keywords extracted.
             </div>
           ) : (
@@ -138,7 +138,6 @@ export default function NoteDetailPage({ onDataChange }) {
                   key={kw}
                   to={`/notes?q=${encodeURIComponent(kw)}`}
                   className="tag-chip"
-                  style={{ background: 'var(--bg-hover)', padding: '2px 8px', borderRadius: '3px' }}
                 >
                   {kw}
                 </Link>

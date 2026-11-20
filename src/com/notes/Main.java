@@ -12,6 +12,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.FileInputStream;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
@@ -23,6 +24,16 @@ public class Main {
         // quick check to see if database is reachable
         try (Connection conn = DBConnection.getConnection()) {
             System.out.println("Connected to MySQL database successfully.");
+
+            // Verify and auto-heal schema compatibility if user_id columns are missing
+            try (java.sql.Statement stmt = conn.createStatement()) {
+                try {
+                    stmt.executeUpdate("ALTER TABLE notes ADD COLUMN user_id INT NOT NULL DEFAULT 1");
+                } catch (SQLException ignored) {}
+                try {
+                    stmt.executeUpdate("ALTER TABLE folders ADD COLUMN user_id INT NOT NULL DEFAULT 1");
+                } catch (SQLException ignored) {}
+            } catch (SQLException ignored) {}
         } catch (Exception e) {
             System.out.println("Warning: Could not connect to MySQL: " + e.getMessage());
             System.out.println("Check db.properties to make sure credentials and port are correct.");

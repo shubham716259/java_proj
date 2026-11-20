@@ -133,81 +133,83 @@ export default function FoldersPage({ onDataChange }) {
       ) : folders.length === 0 ? (
         <div className="empty-state">No folders created yet.</div>
       ) : (
-        <table className="simple-table">
-          <thead>
-            <tr>
-              <th>Folder Name</th>
-              <th style={{ width: '120px' }}>Notes</th>
-              <th style={{ width: '280px' }}>Rename</th>
-              <th style={{ width: '90px' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {folders.map((folder) => {
-              const isEditing = editingId === folder.id;
-              return (
-                <tr key={folder.id}>
-                  <td>
-                    <Link
-                      to={`/notes?folderId=${folder.id}`}
-                      style={{ color: 'var(--text-ink)', fontWeight: 600, textDecoration: 'none' }}
-                    >
-                      {folder.name}
-                    </Link>
-                  </td>
-                  <td>
-                    <span className="count-badge">{folder.noteCount || 0} note(s)</span>
-                  </td>
-                  <td>
-                    {isEditing ? (
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <input
-                          type="text"
-                          className="form-input"
-                          style={{ padding: '4px 8px', fontSize: '13px' }}
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          autoFocus
-                        />
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-primary"
-                          onClick={() => handleRename(folder.id)}
-                        >
-                          Save
-                        </button>
+        <div className="table-responsive">
+          <table className="simple-table">
+            <thead>
+              <tr>
+                <th>Folder Name</th>
+                <th style={{ width: '120px' }}>Notes</th>
+                <th style={{ width: '280px' }}>Rename</th>
+                <th style={{ width: '90px' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {folders.map((folder) => {
+                const isEditing = editingId === folder.id;
+                return (
+                  <tr key={folder.id}>
+                    <td>
+                      <Link
+                        to={`/notes?folderId=${folder.id}`}
+                        style={{ color: 'var(--text)', fontWeight: 600, textDecoration: 'none' }}
+                      >
+                        {folder.name}
+                      </Link>
+                    </td>
+                    <td>
+                      <span className="count-badge">{folder.noteCount || 0} note(s)</span>
+                    </td>
+                    <td>
+                      {isEditing ? (
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <input
+                            type="text"
+                            className="form-input"
+                            style={{ padding: '4px 8px', fontSize: '13px' }}
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            autoFocus
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleRename(folder.id)}
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-sm"
+                            onClick={cancelEditing}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
                         <button
                           type="button"
                           className="btn btn-sm"
-                          onClick={cancelEditing}
+                          onClick={() => startEditing(folder)}
                         >
-                          Cancel
+                          Rename
                         </button>
-                      </div>
-                    ) : (
+                      )}
+                    </td>
+                    <td>
                       <button
                         type="button"
-                        className="btn btn-sm"
-                        onClick={() => startEditing(folder)}
+                        className="btn btn-sm btn-danger"
+                        onClick={() => setDeleteTarget(folder)}
                       >
-                        Rename
+                        Delete
                       </button>
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-danger"
-                      onClick={() => setDeleteTarget(folder)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <ConfirmDialog

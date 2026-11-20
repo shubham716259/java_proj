@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import ThemeToggle from './components/ThemeToggle';
 import DashboardPage from './pages/DashboardPage';
 import NotesPage from './pages/NotesPage';
 import NoteDetailPage from './pages/NoteDetailPage';
@@ -13,6 +14,7 @@ export default function App() {
   const [folders, setFolders] = useState([]);
   const [tags, setTags] = useState([]);
   const [totalNotes, setTotalNotes] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const refreshSidebar = useCallback(async () => {
     try {
@@ -40,14 +42,28 @@ export default function App() {
           folders={folders}
           tags={tags}
           totalNotes={totalNotes}
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
         />
 
         <div className="main-content">
           <header className="topbar">
-            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-              Personal Knowledge Base &bull; CSE Project
+            <div className="topbar-left">
+              <button
+                type="button"
+                className="mobile-menu-btn"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                aria-label="Toggle navigation menu"
+              >
+                {mobileMenuOpen ? '✕' : '☰'}
+              </button>
+              <div className="topbar-title">
+                Personal Knowledge Base &bull; CSE Project
+              </div>
             </div>
+
             <div className="topbar-right">
+              <ThemeToggle />
               <Link to="/notes/new" className="btn btn-primary btn-sm">
                 + New note
               </Link>

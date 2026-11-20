@@ -4,16 +4,20 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 /**
  * Sidebar navigation displaying brand, primary links, folders, and tags.
  */
-export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
+export default function Sidebar({ folders = [], tags = [], totalNotes = 0, isOpen = false, onClose }) {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const activeFolderId = searchParams.get('folderId');
   const activeTagId = searchParams.get('tag');
 
+  const handleNavClick = () => {
+    if (onClose) onClose();
+  };
+
   return (
-    <aside className="sidebar">
-      <Link to="/" className="brand">
-        Smart Notes
+    <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
+      <Link to="/" className="brand" onClick={handleNavClick}>
+        <span className="brand-title">Smart Notes</span>
         <span className="brand-sub">Personal Knowledge Base</span>
       </Link>
 
@@ -22,6 +26,7 @@ export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
           <NavLink
             to="/"
             end
+            onClick={handleNavClick}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           >
             Dashboard
@@ -31,6 +36,7 @@ export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
           <NavLink
             to="/notes"
             end={location.pathname === '/notes' && !location.search}
+            onClick={handleNavClick}
             className={({ isActive }) => `nav-item ${isActive && !activeFolderId && !activeTagId ? 'active' : ''}`}
           >
             <span>All Notes</span>
@@ -40,6 +46,7 @@ export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
         <li>
           <NavLink
             to="/notes/new"
+            onClick={handleNavClick}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           >
             New Note
@@ -48,6 +55,7 @@ export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
         <li>
           <NavLink
             to="/folders"
+            onClick={handleNavClick}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           >
             <span>Folders</span>
@@ -60,7 +68,7 @@ export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
       <div className="sidebar-heading">Folders</div>
       <ul className="nav-list">
         {folders.length === 0 ? (
-          <li style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--text-dim)' }}>
+          <li style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--muted)' }}>
             No folders yet
           </li>
         ) : (
@@ -70,6 +78,7 @@ export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
               <li key={folder.id}>
                 <Link
                   to={`/notes?folderId=${folder.id}`}
+                  onClick={handleNavClick}
                   className={`nav-item ${isFolderActive ? 'active' : ''}`}
                 >
                   <span>{folder.name}</span>
@@ -85,7 +94,7 @@ export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
       <div className="sidebar-heading">Tags</div>
       <div className="sidebar-tags">
         {tags.length === 0 ? (
-          <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>No tags yet</span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--muted)', padding: '0 4px' }}>No tags yet</span>
         ) : (
           tags.map((tag) => {
             const isTagActive = location.pathname === '/notes' && activeTagId === String(tag.id);
@@ -93,6 +102,7 @@ export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
               <Link
                 key={tag.id}
                 to={`/notes?tag=${tag.id}`}
+                onClick={handleNavClick}
                 className={`tag-chip ${isTagActive ? 'active' : ''}`}
               >
                 #{tag.name}
@@ -103,7 +113,7 @@ export default function Sidebar({ folders = [], tags = [], totalNotes = 0 }) {
       </div>
 
       <div className="sidebar-footer">
-        Notes project, CSE
+        Notes project &bull; CSE
       </div>
     </aside>
   );

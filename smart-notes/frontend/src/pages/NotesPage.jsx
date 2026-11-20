@@ -76,7 +76,6 @@ export default function NotesPage({ onDataChange }) {
   const handleTogglePin = async (id) => {
     try {
       await togglePin(id);
-      // Refresh list
       const res = await getNotes({ q, folderId, tag, sort, order });
       setNotes(res.notes || []);
       if (onDataChange) onDataChange();
@@ -179,14 +178,14 @@ export default function NotesPage({ onDataChange }) {
 
       {/* Search keyword banner & related searches */}
       {q && (
-        <div style={{ marginBottom: '18px' }}>
-          <div style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '8px' }}>
             Showing keyword matches for &ldquo;<strong>{q}</strong>&rdquo;
           </div>
 
           {relatedSearches && relatedSearches.length > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '12px', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Related searches:
               </span>
               {relatedSearches.map((term) => (
@@ -194,7 +193,6 @@ export default function NotesPage({ onDataChange }) {
                   key={term}
                   type="button"
                   className="tag-chip"
-                  style={{ background: 'var(--bg-hover)', padding: '2px 8px', borderRadius: '3px' }}
                   onClick={() => updateParam('q', term)}
                 >
                   {term}
