@@ -105,11 +105,15 @@ export default function NotesPage({ onDataChange }) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 className="page-title">All Notes</h1>
+          <h1 className="page-title">All notes</h1>
           <div className="page-desc">{total} note(s) found</div>
         </div>
         <Link to="/notes/new" className="btn btn-primary">
-          + New note
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span>New note</span>
         </Link>
       </div>
 
@@ -208,6 +212,7 @@ export default function NotesPage({ onDataChange }) {
         notes={notes}
         loading={loading}
         emptyMessage={hasActiveFilters ? "Nothing matches your filter or search." : "No notes found. Create your first note!"}
+        showCreateAction={!hasActiveFilters}
         onTogglePin={handleTogglePin}
         onDeleteClick={(note) => setDeleteTarget(note)}
       />

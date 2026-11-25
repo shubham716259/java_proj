@@ -25,6 +25,20 @@ public class Main {
         try (Connection conn = DBConnection.getConnection()) {
             System.out.println("Connected to MySQL database successfully.");
 
+            // Signup needs this table. Create it when the connected database is new.
+            // IF NOT EXISTS leaves existing accounts and data untouched.
+            try (java.sql.Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate("""
+                        CREATE TABLE IF NOT EXISTS users (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            username VARCHAR(50) NOT NULL UNIQUE,
+                            password_hash VARCHAR(64) NOT NULL,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                        """);
+            }
+            System.out.println("Users table is ready.");
+
             // Verify and auto-heal schema compatibility if user_id columns are missing
             try (java.sql.Statement stmt = conn.createStatement()) {
                 try {
@@ -81,7 +95,11 @@ public class Main {
             server.createContext("/notes/delete", new NoteDeleteHandler(noteDAO, folderDAO, tagDAO, userDAO));
             server.createContext("/notes/pin", new NotePinHandler(noteDAO, userDAO));
             server.createContext("/folders", new FolderHandler(folderDAO, tagDAO, noteDAO, userDAO));
-            server.createContext("/static/", new StaticHandler());
+            // register static routes
+            StaticHandler staticHandler = new StaticHandler();
+            server.createContext("/static/", staticHandler);
+            server.createContext("/favicon.ico", staticHandler);
+            server.createContext("/favicon.svg", staticHandler);
 
             // use a small thread pool to handle multiple requests
             server.setExecutor(Executors.newFixedThreadPool(8));

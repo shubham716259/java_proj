@@ -13,7 +13,10 @@ public class StaticHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
-        String filePart = path.replace("/static/", "");
+        String filePart = path.startsWith("/static/") ? path.substring("/static/".length()) : path.replaceAll("^/+", "");
+        if ("favicon.ico".equals(filePart)) {
+            filePart = "favicon.svg";
+        }
 
         File file = new File("static", filePart);
         if (!file.exists() || file.isDirectory()) {
@@ -24,6 +27,12 @@ public class StaticHandler implements HttpHandler {
         String mime = "text/plain";
         if (filePart.endsWith(".css")) {
             mime = "text/css; charset=UTF-8";
+        } else if (filePart.endsWith(".svg")) {
+            mime = "image/svg+xml";
+        } else if (filePart.endsWith(".ico")) {
+            mime = "image/x-icon";
+        } else if (filePart.endsWith(".png")) {
+            mime = "image/png";
         }
 
         exchange.getResponseHeaders().set("Content-Type", mime);

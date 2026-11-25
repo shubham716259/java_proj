@@ -171,13 +171,28 @@ public class AuthHandler implements HttpHandler {
         sb.append("  <meta charset=\"UTF-8\">\n");
         sb.append("  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
         sb.append("  <title>").append(title).append(" - Smart Notes</title>\n");
+        sb.append("  <link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\">\n");
+        sb.append("  <meta name=\"theme-color\" content=\"#6366f1\">\n");
         sb.append("  <link rel=\"stylesheet\" href=\"/static/style.css\">\n");
         sb.append("</head>\n<body class=\"auth-body\">\n");
 
         sb.append("  <div class=\"auth-container\">\n");
         sb.append("    <div class=\"auth-brand\">\n");
-        sb.append("      <a href=\"/\" class=\"brand\" style=\"margin-bottom: 0;\">Smart Notes</a>\n");
-        sb.append("      <div class=\"brand-sub\" style=\"margin-top: 4px;\">Personal Knowledge Base</div>\n");
+        sb.append("      <a href=\"/\" class=\"brand auth-brand-link\">\n");
+        sb.append("        <svg class=\"logo-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"60 50 200 200\" width=\"40\" height=\"40\" aria-hidden=\"true\">\n");
+        sb.append("          <rect x=\"60\" y=\"50\" width=\"200\" height=\"200\" rx=\"44\" fill=\"#6366f1\"/>\n");
+        sb.append("          <path d=\"M100 80H196L220 104V220H100Z\" fill=\"#fff\"/>\n");
+        sb.append("          <path d=\"M196 80V104H220Z\" fill=\"#c7d2fe\"/>\n");
+        sb.append("          <rect x=\"118\" y=\"124\" width=\"84\" height=\"8\" rx=\"4\" fill=\"#c7d2fe\"/>\n");
+        sb.append("          <rect x=\"118\" y=\"146\" width=\"64\" height=\"8\" rx=\"4\" fill=\"#c7d2fe\"/>\n");
+        sb.append("          <rect x=\"118\" y=\"168\" width=\"76\" height=\"8\" rx=\"4\" fill=\"#c7d2fe\"/>\n");
+        sb.append("          <path d=\"M222 186L230 206L250 214L230 222L222 242L214 222L194 214L214 206Z\" fill=\"#fbbf24\" stroke=\"#6366f1\" stroke-width=\"5\" stroke-linejoin=\"round\"/>\n");
+        sb.append("        </svg>\n");
+        sb.append("        <div class=\"brand-text-wrap\">\n");
+        sb.append("          <span class=\"logo-text\" style=\"font-size: 1.35rem; font-weight: 700;\">Smart Notes</span>\n");
+        sb.append("          <div class=\"brand-sub\" style=\"margin-top: 2px;\">Personal Knowledge Base</div>\n");
+        sb.append("        </div>\n");
+        sb.append("      </a>\n");
         sb.append("    </div>\n");
 
         sb.append("    <div class=\"auth-card\">\n");

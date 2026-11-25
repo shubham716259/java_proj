@@ -120,7 +120,7 @@ public class FolderHandler implements HttpHandler {
         sb.append("  <tbody>\n");
 
         if (folders.isEmpty()) {
-            sb.append("    <tr><td colspan=\"4\" style=\"text-align: center; color: var(--text-muted); padding: 20px;\">No folders yet.</td></tr>\n");
+            sb.append("    <tr><td colspan=\"4\"><div class=\"empty-state\" style=\"border: none; background: transparent; padding: 24px;\"><svg class=\"empty-state-icon\" width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z\"/></svg><p class=\"empty-state-text\">No folders created yet.</p></div></td></tr>\n");
         } else {
             for (Folder f : folders) {
                 int cnt = counts.getOrDefault(f.getId(), 0);

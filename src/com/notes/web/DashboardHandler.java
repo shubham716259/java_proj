@@ -55,11 +55,23 @@ public class DashboardHandler implements HttpHandler {
         sb.append("  </div>\n");
         sb.append("</div>\n");
 
+        // In-page search bar
+        sb.append("<div style=\"margin-bottom: 28px;\">\n");
+        sb.append("  <form action=\"/notes\" method=\"GET\" class=\"search-bar\">\n");
+        sb.append("    <svg class=\"search-icon\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"/></svg>\n");
+        sb.append("    <input type=\"text\" name=\"q\" class=\"search-input\" placeholder=\"Search across all notes...\" />\n");
+        sb.append("    <kbd class=\"search-kbd-hint\" title=\"Press Ctrl+K or / to search\"><span class=\"search-kbd-key\">Ctrl</span><span class=\"search-kbd-key\">K</span></kbd>\n");
+        sb.append("  </form>\n");
+        sb.append("</div>\n");
+
         // Pinned notes section
         sb.append("<div style=\"margin-bottom: 32px;\">\n");
         sb.append("  <div style=\"font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 10px;\">Pinned</div>\n");
         if (pinned.isEmpty()) {
-            sb.append("  <div class=\"empty-state\">No pinned notes. You can pin important notes to keep them here.</div>\n");
+            sb.append("  <div class=\"empty-state\">\n");
+            sb.append("    <svg class=\"empty-state-icon\" width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"/></svg>\n");
+            sb.append("    <p class=\"empty-state-text\">No pinned notes yet. Pin important notes to keep them here.</p>\n");
+            sb.append("  </div>\n");
         } else {
             sb.append("  <div class=\"note-list\">\n");
             for (Note n : pinned) {
@@ -73,7 +85,11 @@ public class DashboardHandler implements HttpHandler {
         sb.append("<div>\n");
         sb.append("  <div style=\"font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 10px;\">Recently updated</div>\n");
         if (recent.isEmpty()) {
-            sb.append("  <div class=\"empty-state\">Nothing here yet. Create your first note.</div>\n");
+            sb.append("  <div class=\"empty-state\">\n");
+            sb.append("    <svg class=\"empty-state-icon\" width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><polyline points=\"14 2 14 8 20 8\"/><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"/><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"/><line x1=\"10\" y1=\"9\" x2=\"8\" y2=\"9\"/></svg>\n");
+            sb.append("    <p class=\"empty-state-text\">Nothing here yet. Create your first note.</p>\n");
+            sb.append("    <a href=\"/notes/new\" class=\"btn btn-primary btn-sm empty-state-btn\">Create your first note</a>\n");
+            sb.append("  </div>\n");
         } else {
             sb.append("  <div class=\"note-list\">\n");
             for (Note n : recent) {

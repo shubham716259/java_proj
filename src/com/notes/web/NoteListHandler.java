@@ -91,7 +91,13 @@ public class NoteListHandler implements HttpHandler {
 
         // Filter / sort bar
         sb.append("<form method=\"GET\" action=\"/notes\" class=\"filter-bar\">\n");
-        sb.append("  <input type=\"text\" name=\"q\" class=\"form-input\" style=\"width: 220px; padding: 4px 8px; font-size: 13px;\" placeholder=\"Filter search...\" value=\"").append(HtmlUtil.escape(q)).append("\" />\n");
+        sb.append("  <div class=\"search-bar\" style=\"max-width: 280px; flex: 1 1 220px;\">\n");
+        sb.append("    <svg class=\"search-icon\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"/></svg>\n");
+        sb.append("    <input type=\"text\" name=\"q\" class=\"search-input\" style=\"height: 38px; padding: 0 14px 0 36px;\" placeholder=\"Filter search...\" value=\"").append(HtmlUtil.escape(q)).append("\" />\n");
+        if (!q.isEmpty()) {
+            sb.append("    <a href=\"/notes\" class=\"search-clear-btn\" title=\"Clear filter\" style=\"display: inline-flex; text-decoration: none;\">&times;</a>\n");
+        }
+        sb.append("  </div>\n");
 
         // Folder select
         sb.append("  <select name=\"folder\">\n");
@@ -134,7 +140,11 @@ public class NoteListHandler implements HttpHandler {
         }
 
         if (displayList.isEmpty()) {
-            sb.append("<div class=\"empty-state\">Nothing matches your search or filter.</div>\n");
+            sb.append("<div class=\"empty-state\">\n");
+            sb.append("  <svg class=\"empty-state-icon\" width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"/></svg>\n");
+            sb.append("  <p class=\"empty-state-text\">Nothing matches your search or filter.</p>\n");
+            sb.append("  <a href=\"/notes/new\" class=\"btn btn-primary btn-sm empty-state-btn\">Create your first note</a>\n");
+            sb.append("</div>\n");
         } else {
             sb.append("<div class=\"note-list\">\n");
             for (Note n : displayList) {

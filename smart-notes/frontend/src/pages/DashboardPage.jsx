@@ -73,7 +73,11 @@ export default function DashboardPage({ onDataChange }) {
           <div className="page-desc">Pinned items and your 10 most recently updated notes</div>
         </div>
         <Link to="/notes/new" className="btn btn-primary">
-          + New note
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span>New note</span>
         </Link>
       </div>
 
@@ -109,7 +113,8 @@ export default function DashboardPage({ onDataChange }) {
         <NoteList
           notes={recentNotes}
           loading={loading}
-          emptyMessage="Nothing here yet. Click '+ New note' to start taking notes."
+          emptyMessage="Nothing here yet. Click 'New note' to start taking notes."
+          showCreateAction={true}
           onTogglePin={handleTogglePin}
           onDeleteClick={(note) => setDeleteTarget(note)}
         />
