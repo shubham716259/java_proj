@@ -2,7 +2,8 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-:root {
+:root,
+[data-theme="light"] {
   --bg: #f7f8fa;
   --surface: #ffffff;
   --text: #1f2937;
@@ -56,7 +57,7 @@
 
 /* System Dark Mode */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0f1117;
     --surface: #181b24;
     --text: #e5e7eb;
@@ -514,6 +515,22 @@ h1, h2, h3, h4, h5, h6 {
 .theme-toggle-btn:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.theme-icon-sun {
+  display: none;
+}
+
+.theme-icon-moon {
+  display: block;
+}
+
+[data-theme="dark"] .theme-icon-moon {
+  display: none !important;
+}
+
+[data-theme="dark"] .theme-icon-sun {
+  display: block !important;
 }
 
 .content {

@@ -1,6 +1,7 @@
 /* Smart Notes - Design System & Modern Theme Tokens */
 
-:root {
+:root,
+[data-theme="light"] {
   --bg: #f7f8fa;
   --surface: #ffffff;
   --text: #1f2937;

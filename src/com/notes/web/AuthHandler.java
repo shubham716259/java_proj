@@ -174,7 +174,25 @@ public class AuthHandler implements HttpHandler {
         sb.append("  <link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\">\n");
         sb.append("  <meta name=\"theme-color\" content=\"#6366f1\">\n");
         sb.append("  <link rel=\"stylesheet\" href=\"/static/style.css\">\n");
+        sb.append("  <script>\n");
+        sb.append("    (function() {\n");
+        sb.append("      var saved = localStorage.getItem('theme');\n");
+        sb.append("      if (saved) {\n");
+        sb.append("        document.documentElement.setAttribute('data-theme', saved);\n");
+        sb.append("      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {\n");
+        sb.append("        document.documentElement.setAttribute('data-theme', 'dark');\n");
+        sb.append("      } else {\n");
+        sb.append("        document.documentElement.setAttribute('data-theme', 'light');\n");
+        sb.append("      }\n");
+        sb.append("    })();\n");
+        sb.append("  </script>\n");
         sb.append("</head>\n<body class=\"auth-body\">\n");
+        sb.append("  <div style=\"position: fixed; top: 16px; right: 16px; z-index: 100;\">\n");
+        sb.append("    <button type=\"button\" class=\"theme-toggle-btn\" id=\"theme-toggle-btn\" onclick=\"toggleTheme()\" title=\"Toggle theme\" aria-label=\"Toggle theme\">\n");
+        sb.append("      <svg class=\"theme-icon-moon\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 0 1 1-9-9Z\"/></svg>\n");
+        sb.append("      <svg class=\"theme-icon-sun\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m17.66 17.66 1.41 1.41\"/><path d=\"M2 12h2\"/><path d=\"M20 12h2\"/><path d=\"m6.34 17.66-1.41 1.41\"/><path d=\"m19.07 4.93-1.41 1.41\"/></svg>\n");
+        sb.append("    </button>\n");
+        sb.append("  </div>\n");
 
         sb.append("  <div class=\"auth-container\">\n");
         sb.append("    <div class=\"auth-brand\">\n");
@@ -235,7 +253,27 @@ public class AuthHandler implements HttpHandler {
         sb.append("    </div>\n");
         sb.append("    <div class=\"auth-footer\">Notes project, CSE</div>\n");
         sb.append("  </div>\n");
-
+        sb.append("  <script>\n");
+        sb.append("    function updateThemeUI(theme) {\n");
+        sb.append("      var btn = document.getElementById('theme-toggle-btn');\n");
+        sb.append("      if (btn) {\n");
+        sb.append("        var isDark = theme === 'dark';\n");
+        sb.append("        btn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');\n");
+        sb.append("        btn.setAttribute('aria-label', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');\n");
+        sb.append("      }\n");
+        sb.append("    }\n");
+        sb.append("    function toggleTheme() {\n");
+        sb.append("      var curr = document.documentElement.getAttribute('data-theme') || 'light';\n");
+        sb.append("      var next = curr === 'dark' ? 'light' : 'dark';\n");
+        sb.append("      document.documentElement.setAttribute('data-theme', next);\n");
+        sb.append("      localStorage.setItem('theme', next);\n");
+        sb.append("      updateThemeUI(next);\n");
+        sb.append("    }\n");
+        sb.append("    (function() {\n");
+        sb.append("      var curr = document.documentElement.getAttribute('data-theme') || 'light';\n");
+        sb.append("      updateThemeUI(curr);\n");
+        sb.append("    })();\n");
+        sb.append("  </script>\n");
         sb.append("</body>\n</html>\n");
         return sb.toString();
     }

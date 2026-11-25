@@ -6,10 +6,16 @@ import React, { useState, useEffect } from 'react';
  */
 export default function ThemeToggle() {
   const [theme, setTheme] = useState(() => {
-    return document.documentElement.dataset.theme || 'light';
+    return (
+      localStorage.getItem('theme') ||
+      document.documentElement.getAttribute('data-theme') ||
+      document.documentElement.dataset.theme ||
+      'light'
+    );
   });
 
   useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.dataset.theme = theme;
     localStorage.setItem('theme', theme);
   }, [theme]);

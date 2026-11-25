@@ -36,6 +36,8 @@ public class Layout {
         sb.append("        document.documentElement.setAttribute('data-theme', saved);\n");
         sb.append("      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {\n");
         sb.append("        document.documentElement.setAttribute('data-theme', 'dark');\n");
+        sb.append("      } else {\n");
+        sb.append("        document.documentElement.setAttribute('data-theme', 'light');\n");
         sb.append("      }\n");
         sb.append("    })();\n");
         sb.append("  </script>\n");
@@ -161,8 +163,9 @@ public class Layout {
         sb.append("        <kbd class=\"topbar-search-kbd\" title=\"Press Ctrl+K or / to search\"><span>Ctrl</span> <span>K</span></kbd>\n");
         sb.append("      </form>\n");
         sb.append("      <div class=\"topbar-right\">\n");
-        sb.append("        <button type=\"button\" class=\"theme-toggle-btn\" onclick=\"toggleTheme()\" title=\"Toggle theme\" aria-label=\"Toggle theme\">\n");
-        sb.append("          <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"/></svg>\n");
+        sb.append("        <button type=\"button\" class=\"theme-toggle-btn\" id=\"theme-toggle-btn\" onclick=\"toggleTheme()\" title=\"Toggle theme\" aria-label=\"Toggle theme\">\n");
+        sb.append("          <svg class=\"theme-icon-moon\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"/></svg>\n");
+        sb.append("          <svg class=\"theme-icon-sun\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m17.66 17.66 1.41 1.41\"/><path d=\"M2 12h2\"/><path d=\"M20 12h2\"/><path d=\"m6.34 17.66-1.41 1.41\"/><path d=\"m19.07 4.93-1.41 1.41\"/></svg>\n");
         sb.append("        </button>\n");
         sb.append("        <a href=\"/notes/new\" class=\"btn btn-primary topbar-new-btn\">\n");
         sb.append("          <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/></svg>\n");
@@ -177,12 +180,25 @@ public class Layout {
         sb.append("  </div>\n");
 
         sb.append("  <script>\n");
+        sb.append("    function updateThemeUI(theme) {\n");
+        sb.append("      var btn = document.getElementById('theme-toggle-btn');\n");
+        sb.append("      if (btn) {\n");
+        sb.append("        var isDark = theme === 'dark';\n");
+        sb.append("        btn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');\n");
+        sb.append("        btn.setAttribute('aria-label', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');\n");
+        sb.append("      }\n");
+        sb.append("    }\n");
         sb.append("    function toggleTheme() {\n");
         sb.append("      var curr = document.documentElement.getAttribute('data-theme') || 'light';\n");
         sb.append("      var next = curr === 'dark' ? 'light' : 'dark';\n");
         sb.append("      document.documentElement.setAttribute('data-theme', next);\n");
         sb.append("      localStorage.setItem('theme', next);\n");
+        sb.append("      updateThemeUI(next);\n");
         sb.append("    }\n");
+        sb.append("    (function() {\n");
+        sb.append("      var curr = document.documentElement.getAttribute('data-theme') || 'light';\n");
+        sb.append("      updateThemeUI(curr);\n");
+        sb.append("    })();\n");
         sb.append("    (function() {\n");
         sb.append("      var urlParams = new URLSearchParams(window.location.search);\n");
         sb.append("      var q = urlParams.get('q');\n");
