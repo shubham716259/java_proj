@@ -1,19 +1,39 @@
-/* Smart Notes - Modern UI Design System & Theme Tokens */
+/* ==========================================================================
+   SMART NOTES - DESIGN SYSTEM & THEME TOKENS
+   --------------------------------------------------------------------------
+   1. Change Brand / Accent Color -> edit --accent and --accent-soft below
+   2. Change Main Font            -> edit --font-sans below
+   3. Change Page Background      -> edit --bg below
+   4. Change Card Background      -> edit --surface below
+   5. Change Corner Roundness     -> edit --radius-sm and --radius-md below
+   ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root,
 [data-theme="light"] {
-  --bg: #f7f8fa;
-  --surface: #ffffff;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --accent: #6366f1;
-  --accent-soft: #eef2ff;
-  --border: #e5e7eb;
-  --danger: #ef4444;
+  /* -------------------------------------------------------------
+   * 1. COLORS (LIGHT MODE)
+   * ------------------------------------------------------------- */
+  --bg: #f7f8fa;           /* Main webpage background color */
+  --surface: #ffffff;      /* Cards, sidebar, modal background */
+  --text: #1f2937;         /* Main text color (headings, body) */
+  --muted: #6b7280;        /* Secondary / subtitle / hint color */
+  
+  /* BRAND / PRIMARY COLOR:
+   * Purple (Default): --accent: #6366f1;  --accent-soft: #eef2ff;
+   * Blue:             --accent: #2563eb;  --accent-soft: #eff6ff;
+   * Green / Emerald:  --accent: #059669;  --accent-soft: #ecfdf5;
+   * Red / Rose:       --accent: #e11d48;  --accent-soft: #fff1f2;
+   * Teal:             --accent: #0d9488;  --accent-soft: #f0fdfa; */
+  --accent: #6366f1;        /*  Buttons, active tabs, highlights */
+  --accent-soft: #eef2ff;   /*  Light tint for button hover/badges */
+  --accent-hover: #4f46e5;  /*  Darker shade when button is hovered */
+  
+  --border: #e5e7eb;       /*  Dividing lines and card borders */
+  --danger: #ef4444;       /*  Delete buttons and error alerts */
 
-  /* Backward Compatibility Aliases */
+  /* Aliases for backwards compatibility */
   --bg-page: var(--bg);
   --bg-sidebar: var(--surface);
   --bg-surface: var(--surface);
@@ -25,14 +45,23 @@
   --border-color: var(--border);
   --border-dark: var(--border);
   --accent-light: var(--accent-soft);
-  --accent-hover: #4f46e5;
 
-  /* Typography */
+  /* -------------------------------------------------------------
+   * 2. TYPOGRAPHY / FONTS
+   * -------------------------------------------------------------
+   * Common font choices if asked:
+   * Modern clean:     'Inter', system-ui, sans-serif;
+   * Standard Arial:   Arial, Helvetica, sans-serif;
+   * Windows Segoe UI: 'Segoe UI', Tahoma, sans-serif;
+   * Serif (Classic):  Georgia, 'Times New Roman', serif;
+   * Google Roboto:    'Roboto', sans-serif; */
   --font-serif: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;  /* [CHANGE HERE]: Main website font */
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;                             /* [CHANGE HERE]: Code block font */
 
-  /* Spacing Scale */
+  /* -------------------------------------------------------------
+   * 3. SPACING SCALE
+   * ------------------------------------------------------------- */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -40,31 +69,40 @@
   --space-6: 24px;
   --space-8: 32px;
 
-  /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-full: 999px;
+  /* -------------------------------------------------------------
+   * 4. BORDER RADII (CORNER ROUNDNESS)
+   * -------------------------------------------------------------
+   * Sharp / Square corners:  --radius-sm: 0px;  --radius-md: 0px;
+   * Default rounded:         --radius-sm: 8px;  --radius-md: 12px;
+   * Extra rounded / bubbly:  --radius-sm: 16px; --radius-md: 24px; */
+  --radius-sm: 8px;        /*  Button, input & tag corner radius */
+  --radius-md: 12px;       /*  Note cards & container corner radius */
+  --radius-full: 999px;    /* Pill badges */
 
-  /* Shadows */
+  /* -------------------------------------------------------------
+   * 5. SHADOWS & TRANSITIONS
+   * ------------------------------------------------------------- */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
   --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.06);
   --backdrop: rgba(15, 17, 23, 0.5);
 
-  /* Transitions */
   --transition-fast: 150ms ease;
 }
 
-/* System Dark Mode */
+/* =============================================================
+ * 6. DARK MODE COLORS (When Dark Mode is Active)
+ * ============================================================= */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1117;
-    --surface: #181b24;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
-    --accent: #818cf8;
-    --accent-soft: #1e2140;
-    --border: #2a2e3a;
+    --bg: #0f1117;           /* [DARK MODE]: Page background */
+    --surface: #181b24;      /* [DARK MODE]: Card and sidebar background */
+    --text: #e5e7eb;         /* [DARK MODE]: Main text color */
+    --muted: #9ca3af;        /* [DARK MODE]: Muted / secondary text */
+    --accent: #818cf8;       /* [DARK MODE]: Brand / accent button color */
+    --accent-soft: #1e2140;  /* [DARK MODE]: Accent hover tint */
+    --accent-hover: #a5b4fc;
+    --border: #2a2e3a;       /* [DARK MODE]: Borders */
     --danger: #f87171;
 
     --bg-page: var(--bg);
@@ -78,7 +116,6 @@
     --border-color: var(--border);
     --border-dark: var(--border);
     --accent-light: var(--accent-soft);
-    --accent-hover: #a5b4fc;
 
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
@@ -87,15 +124,15 @@
   }
 }
 
-/* Explicit Dark Mode */
 [data-theme="dark"] {
-  --bg: #0f1117;
-  --surface: #181b24;
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --accent: #818cf8;
-  --accent-soft: #1e2140;
-  --border: #2a2e3a;
+  --bg: #0f1117;           /* [DARK MODE]: Page background */
+  --surface: #181b24;      /* [DARK MODE]: Card and sidebar background */
+  --text: #e5e7eb;         /* [DARK MODE]: Main text color */
+  --muted: #9ca3af;        /* [DARK MODE]: Muted / secondary text */
+  --accent: #818cf8;       /* [DARK MODE]: Brand / accent button color */
+  --accent-soft: #1e2140;  /* [DARK MODE]: Accent hover tint */
+  --accent-hover: #a5b4fc;
+  --border: #2a2e3a;       /* [DARK MODE]: Borders */
   --danger: #f87171;
 
   --bg-page: var(--bg);
@@ -109,7 +146,6 @@
   --border-color: var(--border);
   --border-dark: var(--border);
   --accent-light: var(--accent-soft);
-  --accent-hover: #a5b4fc;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
@@ -1222,11 +1258,12 @@ textarea.form-input {
   min-width: 0;
 }
 
+/* [CHANGE HERE]: "Smart Notes" Logo Title Styling */
 .logo-text {
   font-family: inherit;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-ink);
+  font-size: 1.15rem;      /* [CHANGE HERE]: Change font size of "Smart Notes" (e.g., 1.4rem or 22px) */
+  font-weight: 700;        /* [CHANGE HERE]: 400 for regular, 700 for bold, 800 for extra bold */
+  color: var(--text-ink);  /* [CHANGE HERE]: Color of "Smart Notes" title */
   line-height: 1.2;
   text-decoration: none;
   letter-spacing: -0.02em;
